@@ -437,6 +437,7 @@ class Parser {
    * @return {string}
    */
   static convertType(type, hasSpread, parentNode) {
+    type = type.trim();
     if (hasSpread) {
       return type.replace(/(.*)\[]$/, '$1');
     }
