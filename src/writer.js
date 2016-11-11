@@ -155,16 +155,33 @@ ${node.qualifiedName}${expr};
   }
 
   static typeToString(type, node) {
+    var prefix;
+    switch (type) {
+      case 'string':
+      case 'number':
+      case 'boolean':
+      case '*':
+        prefix = '';
+        break;
+
+      default:
+        prefix = '!'
+        break;
+    }
+    if (node.isOptional) {
+      prefix = "";
+    }
+
     if (Array.isArray(type)) {
-      return `(${type.join('|')})${node.isOptional ? '=' : ''}`;
+      return prefix + `(${type.join('|')})${node.isOptional ? '=' : ''}`;
     }
 
     if (typeof type === 'object') {
-      return '{' + Object.keys(type).map(k =>
+      return prefix + '{' + Object.keys(type).map(k =>
           `${k}: ${Writer.typeToString(type[k].type, type[k])}`).join(', ') + '}';
     }
 
-    return type + (node.isOptional ? '=' : '');
+    return prefix + type + (node.isOptional ? '=' : '');
   }
 }
 
