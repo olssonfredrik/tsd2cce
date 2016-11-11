@@ -35,8 +35,7 @@ class Parser {
     /**
      * @private
      */
-    this.tsAst_ =
-      ts.createSourceFile(filename, source, ts.ScriptTarget.ES6, true);
+    this.tsAst_ = ts.createSourceFile(filename, source, ts.ScriptTarget.ES6, true);
 
     /**
      * @type {{}}
@@ -51,10 +50,22 @@ class Parser {
     return this.ast_;
   }
 
+
   parse_() {
     let self = this;
+     
+    function isPrivate(node) {
+      if (node.modifiers && node.modifiers.length) {
+        return node.modifiers.some((mod) => {
+          return Parser.removeComments(self.source_.substr(mod.pos, mod.end - mod.pos).trim()) === 'private';
+        });
+      }
+    }
 
     function traverse(/** ts.Node */node) {
+      if (isPrivate(node)) {
+        return;
+      }
       switch (node.kind) {
         case ts.SyntaxKind.ModuleDeclaration:
           self.defineModule(node);
