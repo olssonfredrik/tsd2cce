@@ -272,7 +272,7 @@ class Parser {
         return 'function';
       }
 
-      return `function(${funcNode.parameters.map(p => p.name + ':' + p.type).join(',')})${funcNode.type ? ':' + funcNode.type : ''}`;
+      return `function(${funcNode.parameters.map(p => '' + p.type).join(',')})${funcNode.type ? ':' + funcNode.type : ''}`;
     }
 
     // Transform an object type
