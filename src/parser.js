@@ -13,12 +13,13 @@ const NodeKind = {
   PROPERTY: 5,
   FUNCTION: 6,
   VARIABLE: 7,
-  OBJECT: 8
+  OBJECT: 8,
+  ENUM: 9
 };
 exports.NodeKind = NodeKind;
 
 const SimpleTypes = [
-  'number', 'string', 'boolean', 'any', 'Object', 'Array', 'void'
+  'number', 'string', 'boolean', 'any', 'Object', 'Array', 'void', 'Float32Array', 'T', 'HTMLImageElement'
 ];
 
 
@@ -71,7 +72,7 @@ class Parser {
           self.defineModule(node);
           break;
         case ts.SyntaxKind.EnumDeclaration:
-          self.defineObject(node);
+          self.defineEnum(node);
           break;
         case ts.SyntaxKind.EnumMember:
           self.defineObject(node);
@@ -170,8 +171,11 @@ class Parser {
    */
   getTypeName(node) {
     if (node.type && node.type.typeName) {
-      return Parser.convertType(Parser.getModuleName(node) + '.' +
-        node.type.typeName.text, !!node.dotDotDotToken, node);
+      if (SimpleTypes.indexOf(node.type.typeName.text) !== -1) {
+        return Parser.convertType(node.type.typeName.text, !!node.dotDotDotToken, node);
+      } else {
+        return Parser.convertType(Parser.getModuleName(node) + '.' + node.type.typeName.text, !!node.dotDotDotToken, node);
+      }
     }
 
     if (node.type) {
@@ -334,6 +338,11 @@ class Parser {
 
   defineObject(/** ts.Node */node) {
     this.initNodeNamespace_(node, NodeKind.OBJECT)
+      .qualifiedName = Parser.getNamespaceName(node);
+  }
+
+  defineEnum(/** ts.Node */node) {
+    this.initNodeNamespace_(node, NodeKind.ENUM)
       .qualifiedName = Parser.getNamespaceName(node);
   }
 

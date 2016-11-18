@@ -6,6 +6,10 @@ const NodeKind = require('./parser').NodeKind;
 const PROPERTIES = ['kind', 'qualifiedName', 'parameters', 'isStatic', 'type',
   'isSpread', 'isOptional', 'extends', 'implements', '#'];
 
+const NonNullable = [
+  'number', 'string', 'boolean', '*', 'T'
+];
+
 
 class Writer {
 
@@ -45,6 +49,7 @@ class Writer {
         case NodeKind.PROPERTY: this.writeProperty_(node); break;
         case NodeKind.VARIABLE: this.writeProperty_(node); break;
         case NodeKind.OBJECT: this.writeObject_(node); break;
+        case NodeKind.ENUM: this.writeEnum_(node); break;
       }
     }
 
@@ -125,15 +130,30 @@ var ${node.qualifiedName} = {};
     this.writeExpression_(node, comments, ' = {}');
   }
 
+  writeEnum_(node) {
+    let comments = [];
+    comments.push("@enum {number}");
+    if (node.type) {
+      //comments.push(`@type {${Writer.typeToString(node.type, node)}}`);
+    }
+
+    this.writeExpression_(node, comments, ' = {}');
+  }
+
   writeFunctionDeclaration_(node, comments) {
     this.writeExpression_(node, comments, ` = function(${Writer.parametersString(node)}) {}`);
   }
 
   writeParameterComments_(node, comments) {
+    let template = false;
     if (node.parameters && node.parameters.length) {
       node.parameters.forEach((param) => {
+        template |= (param.type == "T");
         comments.push(`@param {${Writer.typeToString(param.type, param)}} ${param.name}`);
       });
+      if (template) {
+        comments.push("@template T");
+      }
     }
   }
 
@@ -155,20 +175,9 @@ ${node.qualifiedName}${expr};
   }
 
   static typeToString(type, node) {
-    var prefix;
-    switch (type) {
-      case 'string':
-      case 'number':
-      case 'boolean':
-      case '*':
-        prefix = '';
-        break;
+    var prefix = "!";
 
-      default:
-        prefix = '!'
-        break;
-    }
-    if (node.isOptional) {
+    if (node.isOptional || NonNullable.indexOf(type) !== -1) {
       prefix = "";
     }
 
@@ -177,8 +186,7 @@ ${node.qualifiedName}${expr};
     }
 
     if (typeof type === 'object') {
-      return prefix + '{' + Object.keys(type).map(k =>
-          `${k}: ${Writer.typeToString(type[k].type, type[k])}`).join(', ') + '}';
+      return prefix + '{' + Object.keys(type).map(k => `${k}: ${Writer.typeToString(type[k].type, type[k])}`).join(', ') + '}';
     }
 
     return prefix + type + (node.isOptional ? '=' : '');
