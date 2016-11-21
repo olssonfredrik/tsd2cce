@@ -145,13 +145,22 @@ var ${node.qualifiedName} = {};
   }
 
   writeParameterComments_(node, comments) {
+    let templateRegExp = new RegExp("(^|[^0-9A-Za-z_])T($|[^0-9A-Za-z_])");
+    let constructor = false;
+    if (comments && comments.length > 0) {
+      comments.forEach((comment) => { 
+        constructor |= (comment == "@constructor"); 
+      });
+    }
+
     let template = false;
     if (node.parameters && node.parameters.length) {
       node.parameters.forEach((param) => {
-        template |= (param.type == "T");
+        template |= templateRegExp.test(param.type);
         comments.push(`@param {${Writer.typeToString(param.type, param)}} ${param.name}`);
       });
-      if (template) {
+
+      if (template && (constructor || node.isStatic)) {
         comments.push("@template T");
       }
     }
