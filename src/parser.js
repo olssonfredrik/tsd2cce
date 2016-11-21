@@ -354,7 +354,8 @@ class Parser {
   defineClass(/** ts.ClassLikeDeclaration */node) {
     let clazz = this.initNodeNamespace_(node, NodeKind.CLASS);
     clazz.qualifiedName = Parser.getNamespaceName(node);
-    clazz.extends = Parser.getHeritageName(node);
+    clazz.extends = Parser.getExtendsName(node);
+    clazz.implements = Parser.getImplementsName(node);
   }
 
   defineConstructor(/** ts.ConstructorDeclaration */node) {
@@ -542,11 +543,22 @@ class Parser {
    * @param {ts.Node} node
    * @return {?string}
    */
-  static getHeritageName(/** ts.ClassLikeDeclaration */node) {
-    if (node.heritageClauses && node.heritageClauses.length) {
+  static getExtendsName(/** ts.ClassLikeDeclaration */node) {
+    if (node.heritageClauses && node.heritageClauses.length > 0 && node.heritageClauses[0].token != 106) {
       return Parser.getModuleName(node) + '.' + node.heritageClauses[0].types[0].expression.text;
     }
 
+    return null;
+  }
+
+  /**
+   * @param {ts.Node} node
+   * @return {?string}
+   */
+  static getImplementsName(/** ts.ClassLikeDeclaration */node) {
+    if (node.heritageClauses && node.heritageClauses.length > 0 && node.heritageClauses[0].token == 106) {
+      return Parser.getModuleName(node) + '.' + node.heritageClauses[0].types[0].expression.text;
+    }
     return null;
   }
 

@@ -89,6 +89,9 @@ var ${node.qualifiedName} = {};
     if (node.extends) {
       comments.push(`@extends {${node.extends}}`);
     }
+    if (node.implements) {
+      comments.push(`@implements {${node.implements}}`);
+    }
 
     this.writeParameterComments_(node, comments);
     this.writeFunctionDeclaration_(node, comments);
