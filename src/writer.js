@@ -136,11 +136,19 @@ var ${node.qualifiedName} = {};
   writeEnum_(node) {
     let comments = [];
     comments.push("@enum {number}");
-    if (node.type) {
-      //comments.push(`@type {${Writer.typeToString(node.type, node)}}`);
-    }
 
-    this.writeExpression_(node, comments, ' = {}');
+    let first = true;
+    let members = "";
+    node.members.forEach((member) => {
+      if (first) {
+        members += `${member.name}: ${member.value}`;
+      } else {
+        members += `,\n${member.name}: ${member.value}`;
+      }
+      first = false;
+    });
+
+    this.writeExpression_(node, comments, ' = {\n' +members+ '\n}');
   }
 
   writeFunctionDeclaration_(node, comments) {
@@ -149,10 +157,10 @@ var ${node.qualifiedName} = {};
 
   writeParameterComments_(node, comments) {
     let templateRegExp = new RegExp("(^|[^0-9A-Za-z_])T($|[^0-9A-Za-z_])");
-    let constructor = false;
+    let isConstructor = false;
     if (comments && comments.length > 0) {
       comments.forEach((comment) => { 
-        constructor |= (comment == "@constructor"); 
+        isConstructor |= (comment == "@constructor"); 
       });
     }
 
@@ -163,7 +171,7 @@ var ${node.qualifiedName} = {};
         comments.push(`@param {${Writer.typeToString(param.type, param)}} ${param.name}`);
       });
 
-      if (template && (constructor || node.isStatic)) {
+      if (template && (isConstructor || node.isStatic)) {
         comments.push("@template T");
       }
     }

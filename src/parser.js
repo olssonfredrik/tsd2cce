@@ -75,7 +75,7 @@ class Parser {
           self.defineEnum(node);
           break;
         case ts.SyntaxKind.EnumMember:
-          self.defineObject(node);
+          self.defineEnumMember(node);
           break;
         case ts.SyntaxKind.InterfaceDeclaration:
           self.defineInterface(node);
@@ -342,8 +342,22 @@ class Parser {
   }
 
   defineEnum(/** ts.Node */node) {
-    this.initNodeNamespace_(node, NodeKind.ENUM)
-      .qualifiedName = Parser.getNamespaceName(node);
+    let enu = this.initNodeNamespace_(node, NodeKind.ENUM);
+    enu.qualifiedName = Parser.getNamespaceName(node);
+    enu.members = [];
+    node.members.forEach((member) => {
+      enu.members.push({
+        name: member.name.text,
+        value: member.initializer.text
+      });
+    });
+  }
+
+  defineEnumMember(/** ts.Node */node) {
+    let variable = this.initNodeNamespace_(node, NodeKind.VARIABLE);
+    variable.qualifiedName = Parser.getNamespaceName(node);
+    variable.name = node.name.text;
+    variable.initializer = node.initializer.text;
   }
 
   defineInterface(/** ts.Node */node) {
