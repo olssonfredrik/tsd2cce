@@ -544,10 +544,9 @@ class Parser {
    * @return {?string}
    */
   static getExtendsName(/** ts.ClassLikeDeclaration */node) {
-    if (node.heritageClauses && node.heritageClauses.length > 0 && node.heritageClauses[0].token != 106) {
+    if (node.heritageClauses && node.heritageClauses.length > 0 && node.heritageClauses[0].token == ts.SyntaxKind.ExtendsKeyword) {
       return Parser.getModuleName(node) + '.' + node.heritageClauses[0].types[0].expression.text;
     }
-
     return null;
   }
 
@@ -556,7 +555,7 @@ class Parser {
    * @return {?string}
    */
   static getImplementsName(/** ts.ClassLikeDeclaration */node) {
-    if (node.heritageClauses && node.heritageClauses.length > 0 && node.heritageClauses[0].token == 106) {
+    if (node.heritageClauses && node.heritageClauses.length > 0 && node.heritageClauses[0].token == ts.SyntaxKind.ImplementsKeyword) {
       return Parser.getModuleName(node) + '.' + node.heritageClauses[0].types[0].expression.text;
     }
     return null;
