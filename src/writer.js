@@ -23,6 +23,9 @@ class Writer {
     this.ast_ = ast;
     this.options_ = opt_options || {strict: true};
 
+    // add closure "header"
+    this.code_.push("/**\n * @fileoverview This is an externs file.\n * @externs\n */");
+
     if (this.options_.strict) {
       this.code_.push(`'use strict';`);
     }
