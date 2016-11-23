@@ -406,35 +406,33 @@ class Parser {
   }
 
   defineProperty(/** ts.PropertyDeclaration */node) {
-    let property = this.initNodeMemberNamespace_(node, NodeKind.PROPERTY);
-    property.qualifiedName = Parser.getPrototypeNamespaceName(node);
+    let property;
+    if (this.isStatic(node)) {
+      property = this.initNodeNamespace_(node, NodeKind.PROPERTY);
+      property.qualifiedName = Parser.getNamespaceName(node);
+    } else {
+      property = this.initNodeMemberNamespace_(node, NodeKind.PROPERTY);
+      property.qualifiedName = Parser.getPrototypeNamespaceName(node);
+    }
+
     this.appendType_(property, node);
   }
 
   definePropertySignature(/** ts.PropertySignature */node) {
     let property;
+    let parent = node.parent;
+    let grandParent = parent.parent;
 
-    switch (node.parent.parent.kind) {
-      case ts.SyntaxKind.PropertyDeclaration:
-        //property = this.initNodeMemberNamespace_(node.parent.parent, NodeKind.PROPERTY);
-        break;
-      case ts.SyntaxKind.VariableDeclaration:
-        //property = this.getNamespace_(Parser.getNamespaceName(node.parent.parent, false));
-        break;
-      case ts.SyntaxKind.MethodDeclaration:
-        if (this.isStatic(node.parent.parent)) {
-          property = this.getNamespace_(Parser.getNamespaceName(node.parent.parent, false));
+    if (grandParent.kind === ts.SyntaxKind.MethodDeclaration) {
+        if (this.isStatic(grandParent)) {
+          property = this.getNamespace_(Parser.getNamespaceName(grandParent, false));
         } else {
-          property = this.initNodeMemberNamespace_(node.parent.parent, NodeKind.METHOD);
-        }
-        break;
-      //default:
-      //  console.log('Skipping signature', node.parent.parent.kind);
-        //throw new Error('Unknown property signature container:' +
-        //  node.parent.parent.kind);
-    }
-
-    if (!property) {
+          property = this.initNodeMemberNamespace_(grandParent, NodeKind.METHOD);
+        }      
+    } else if (parent.kind === ts.SyntaxKind.InterfaceDeclaration) {
+      this.defineProperty(node);
+      return;
+    } else {
       // Skipping this signature. This happens in parameters
       return;
     }
@@ -461,14 +459,14 @@ class Parser {
    * @return {string}
    */
   static convertType(type, hasSpread, parentNode) {
-    type = type.trim();
+    let isArray = (type.match(/\[]$/) !== null);
+    
+    type = type.replace(/(.*)\[]$/, '$1').trim();
     if (hasSpread) {
-      return type.replace(/(.*)\[]$/, '$1');
+      return type;
     }
-
-    if (type.match(/\[]$/) !== null) {
-      return 'Array<' + Parser.convertSimpleType(type.replace(/(.*)\[]$/, '$1'), parentNode) +
-        '>';
+    if (isArray) {
+      return 'Array<' + Parser.convertSimpleType(type, parentNode) + '>';
     }
 
     let matchesObject = type.match(/^\{\[\s*?[a-zA-Z0-9_]+\s*?:\s*?([a-z]+)\s*?]\s*?:\s*?([a-zA-Z\._\[\]]+)[\s;]*?}$/);
