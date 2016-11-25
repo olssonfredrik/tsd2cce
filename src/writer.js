@@ -7,8 +7,10 @@ const PROPERTIES = ['kind', 'qualifiedName', 'parameters', 'isStatic', 'type',
   'isSpread', 'isOptional', 'extends', 'implements', '#'];
 
 const NonNullable = [
-  'number', 'string', 'boolean', '*', 'T'
+  'number', 'boolean', '*', 'T'
 ];
+
+const UseStrictNullChecks = false;
 
 
 class Writer {
@@ -198,7 +200,7 @@ ${node.qualifiedName}${expr};
   }
 
   static typeToString(type, node) {
-    var prefix = "!";
+    var prefix = (UseStrictNullChecks ? "!" : "?");
 
     if (node.isOptional || NonNullable.indexOf(type) !== -1) {
       prefix = "";
