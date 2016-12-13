@@ -19,7 +19,7 @@ const NodeKind = {
 exports.NodeKind = NodeKind;
 
 const SimpleTypes = [
-  'number', 'string', 'boolean', 'any', 'Object', 'Array', 'void', 'Float32Array', 'T', 'HTMLImageElement'
+  'number', 'string', 'boolean', 'any', 'Object', 'Array', 'void', 'Float32Array', 'this', 'T', 'HTMLImageElement'
 ];
 
 
