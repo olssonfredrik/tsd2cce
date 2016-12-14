@@ -89,7 +89,7 @@ var ${node.qualifiedName} = {};
   }
 
   writeClass_(node) {
-    let comments = ['@constructor'];
+    let comments = ['@constructor', '@struct'];
 
     if (node.extends) {
       comments.push(`@extends {${node.extends}}`);
