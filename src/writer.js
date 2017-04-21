@@ -112,7 +112,7 @@ var ${node.qualifiedName} = {};
     let comments = [];
 
     if (node.type && node.type === 'this') {
-      comments.push('@template {T}');
+      comments.push('@template T');
       comments.push('@this {T}');
       this.writeParameterComments_(node, comments);
       comments.push('@return {T}');
@@ -130,7 +130,7 @@ var ${node.qualifiedName} = {};
   writeProperty_(node) {
     let comments = [];
     if (node.type) {
-      comments.push(`@type {${Writer.typeToString(node.type, node)}}`);
+      comments.push(`@public {${Writer.typeToString(node.type, node)}}`);
     }
 
     this.writeExpression_(node, comments, '');
@@ -139,7 +139,7 @@ var ${node.qualifiedName} = {};
   writeObject_(node) {
     let comments = [];
     if (node.type) {
-      comments.push(`@type {${Writer.typeToString(node.type, node)}}`);
+      comments.push(`@public {${Writer.typeToString(node.type, node)}}`);
     }
 
     this.writeExpression_(node, comments, ' = {}');

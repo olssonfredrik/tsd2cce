@@ -28,8 +28,7 @@ class Parser {
   constructor(filename, source) {
     /**
      * The source code of the .d.ts file.
-     * @type {string}
-     * @private
+     * @private {string}
      */
     this.source_ = source;
 
@@ -39,8 +38,7 @@ class Parser {
     this.tsAst_ = ts.createSourceFile(filename, source, ts.ScriptTarget.ES6, true);
 
     /**
-     * @type {{}}
-     * @private
+     * @private {{}}
      */
     this.ast_ = {};
 
@@ -182,7 +180,7 @@ class Parser {
       let type = this.getCodeLiteral(node.type.pos, node.type.end);
 
       type = type.replace(/^\((.*)\)$/, '$1');
-      type = type.split('|').map((t) => Parser.convertType(t, !!node.dotDotDotToken, node));
+      type = type.split('|').map((t) => Parser.convertType(t.trim(), !!node.dotDotDotToken, node));
 
       if (type.length > 1) {
         return type;
